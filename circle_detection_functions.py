@@ -64,7 +64,7 @@ def get_yellow_circles_my1(image):
 def get_yellow_circles_cv2(image):
     
         # Define lower and upper bounds for yellow color in HSV
-        lower_yellow = np.array([100, 0, 0])
+        lower_yellow = np.array([50, 0, 0])
         upper_yellow = np.array([255, 255, 255])
 
     
