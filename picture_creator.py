@@ -3,10 +3,14 @@ import numpy as np
 import fast_tsp
 
 def add_circle(image, center, circle):
+    image = image.copy()
+    image = image.astype(np.uint16)
     y, x = center
     x -= circle.shape[0] // 2
     y -= circle.shape[1] // 2
     image[x:(x+circle.shape[0]), y:(y+circle.shape[1])] += circle
+    image = np.where(image > 255, 255, image)
+    image = image.astype(np.uint8)
     return image
 
 def delete_overlapping_circles(positions, distance):
@@ -36,6 +40,7 @@ def generate_random_picure():
 
 
     radius = 7
+    delete_distance = 5*radius
 
 
     # Define the color of the circles (in BGR format)
@@ -48,7 +53,7 @@ def generate_random_picure():
         # Generate random positions and radii for the circles
         positions = np.random.randint(radius, image_size-30, size=(N, 2))+15
 
-        positions = delete_overlapping_circles(positions, 4*radius)
+        positions = delete_overlapping_circles(positions, delete_distance)
         
         if positions.shape[0] >= 2:
             break
@@ -67,22 +72,25 @@ def generate_random_picure():
     # Create a black image with the generated size
     image = np.zeros((image_size, image_size, 3), dtype=np.uint8)
 
+    
+
+    #draw the path
+    for i in range(positions.shape[0]-1):
+        for th in [6,4,2,1]:
+            overlay = image.copy()
+            alpha = 65/255
+
+            cv2.line(overlay, tuple(positions[i]), tuple(positions[i+1]), (0, 130, 255), th, cv2.LINE_AA)
+
+            image = cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0)
+
     # Draw the circles on the image
     circle = np.load("circle.npy")
     for i in range(positions.shape[0]):
         center = tuple(positions[i])
+
         image = add_circle(image, center, circle)
 
-    #draw the path
-    for i in range(positions.shape[0]-1):
-        th = 10
-        for trans in [50, 100, 150, 200, 250]:
-            overlay = image.copy()
-
-            cv2.line(overlay, tuple(positions[i]), tuple(positions[i+1]), (0, 100, 250), th, cv2.LINE_AA)
-            th =th-2
-            alpha = trans/1000
-            image = cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0)
 
     return ((image), (positions))
 
