@@ -68,3 +68,99 @@ def get_best_path(connection_matrix: np.ndarray) -> tuple[list, float]:
     simple_score = 0.5
     paths = return_paths(connection_matrix, simple_score, [0], 0)
     return paths
+
+
+
+def return_paths(connection_matrix, max_value, current_path, current_score):
+    if not current_path:  #check if current_path is empty
+        return []
+    if len(current_path) == connection_matrix.shape[0]:
+        return current_path
+    #print(len(current_path),current_path)
+    paths = []
+    for i in range(len(connection_matrix)):
+        if i not in current_path:
+            new_score = current_score + connection_matrix[current_path[-1]][i]
+            if new_score <= max_value:
+                new_path = current_path.copy()
+                new_path.append(i)
+                paths.extend(return_paths(connection_matrix, max_value, new_path, new_score))
+    return paths
+    
+
+def get_best_path(connection_matrix: np.ndarray,abort: float) -> tuple[list, float]:
+    simple_score = 0.01
+    paths = []
+    while not paths:
+        paths = return_paths(connection_matrix, simple_score, [0], 0)
+        simple_score = simple_score * 1.1
+        if simple_score > abort:
+            break
+        #print(simple_score)
+    return paths
+
+
+def test_path(connection_matrix, path, K, S):
+    while len(path) < connection_matrix.shape[0]:
+        next_score = np.inf
+        for i in np.argpartition(connection_matrix[path[-1]], K)[:K]:
+            if i not in path:
+                if connection_matrix[path[-1]][i] < next_score:
+                    next_score = connection_matrix[path[-1]][i]
+                    next_pos = i
+        if next_score == np.inf:
+            return False, np.argpartition(connection_matrix[path[-1]], S)[:S]
+        path.append(next_pos)
+
+    return True, path
+
+
+def backtrack_search_old(connection_matrix, path, K, S, D, maxD):
+    if D >= maxD:
+        return False
+    success, result = test_path(connection_matrix, path, K)
+    if success:
+        return result
+    else:
+        print(len(path),"\t",path)
+        for i in range(K):
+            wrong_turn = result[i]
+            print("wrong turn: ", wrong_turn)
+            idx = path.index(wrong_turn)
+            print("idx: ", idx)
+            new_path = path[:idx]
+            print(new_path)
+            for j in np.argpartition(connection_matrix[new_path[-1]], S)[:S]:
+                if j not in new_path:
+                    if j != wrong_turn:
+                        new_path.append(j)
+                        #print("trying: ", new_path)
+                        ret = backtrack_search_old(connection_matrix, new_path, K, S, D+1, maxD)
+                        if ret:
+                            return ret
+    print("no path found")
+    return False
+
+
+
+def backtrack_search(connection_matrix, path, K, S, D, maxD):
+    if D >= maxD:
+        return False
+    success, result = test_path(connection_matrix, path, K, S)
+    if success:
+        return result
+    else:
+        #print(len(path),"\t",path)
+        for i in range(S):
+            wrong_turn = result[i]
+            #print("wrong turn: ", wrong_turn)
+            idx = path.index(wrong_turn)
+            #print("idx: ", idx)
+            new_path = path[:idx+1]
+            new_path.append(wrong_turn)
+            #print(new_path)
+            ret = backtrack_search(connection_matrix, new_path, K, S, D+1, maxD)
+            if ret:
+                return ret
+    #print("no path found")
+    return False
