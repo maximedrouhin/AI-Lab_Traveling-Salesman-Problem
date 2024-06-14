@@ -45,7 +45,7 @@ def get_weighted_ratio_blue_pixels(image, start, end):
 def get_next_pos(image, start, remaining):
     next_pos = 0
     max_ratio_blue = get_ratio_blue_pixels(image, start, remaining[0])
-    for i in range(len(remaining)):
+    for i in range(1, len(remaining)):
         blue_ratio = get_ratio_blue_pixels(image, start, remaining[i])
         if blue_ratio > max_ratio_blue:
             max_ratio_blue = blue_ratio
