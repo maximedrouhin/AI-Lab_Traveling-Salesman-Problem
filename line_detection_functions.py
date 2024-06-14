@@ -46,30 +46,6 @@ def get_simple_best_path(connection_matrix: np.ndarray) -> tuple[list, float]:
         
     return best_path, best_score
 
-def return_paths(connection_matrix, max_value, current_path, current_score):
-    if not current_path:  #check if current_path is empty
-        return []
-    if len(current_path) == connection_matrix.shape[0]:
-        return current_path
-    print(current_path)
-    paths = []
-    for i in range(len(connection_matrix)):
-        if i not in current_path:
-            new_score = current_score + connection_matrix[current_path[-1]][i]
-            if new_score <= max_value:
-                new_path = current_path.copy()
-                new_path.append(i)
-                paths.extend(return_paths(connection_matrix, max_value, new_path, new_score))
-    return paths
-    
-
-def get_best_path(connection_matrix: np.ndarray) -> tuple[list, float]:
-    simple_path, simple_score = get_simple_best_path(connection_matrix)
-    simple_score = 0.5
-    paths = return_paths(connection_matrix, simple_score, [0], 0)
-    return paths
-
-
 
 def return_paths(connection_matrix, max_value, current_path, current_score):
     if not current_path:  #check if current_path is empty
