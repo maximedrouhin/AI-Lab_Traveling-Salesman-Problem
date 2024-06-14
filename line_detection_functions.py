@@ -12,6 +12,36 @@ def get_ratio_blue_pixels(image,start,end):
     #print(np.count_nonzero(image_cp)/np.count_nonzero(black_picture))
     return np.count_nonzero(image_cp)/np.count_nonzero(black_picture)
 
+def get_weighted_ratio_blue_pixels(image, start, end):
+    # Convert the image from RGB to HSL
+    hsl_image = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
+
+    # Create a mask for blue pixels based on your findings
+    hue = hsl_image[:,:,0] * 2  # OpenCV hue is 0-180; multiply by 2 to get 0-360
+    lightness = hsl_image[:,:,1]
+    blue_mask = (hue > 170) & (hue < 225) & (lightness > 20)
+
+    # Create a blank image to draw the line
+    line_image = np.zeros_like(blue_mask, dtype=np.uint8)
+
+    # Draw the line on the blank image
+    cv2.line(line_image, start, end, 1, 2)
+
+    # Find the overlap of the blue pixels and the line
+    overlap_mask = blue_mask & (line_image > 0)
+
+    # Calculate the score based on the green component of the RGB image
+    green_component = image[:,:,1]
+    weighted_score = np.sum(green_component[overlap_mask])
+
+    # Normalize the score by the length of the line
+    line_length = np.count_nonzero(line_image)
+
+    if line_length == 0:
+        return 0
+
+    return weighted_score / line_length
+
 def get_next_pos(image, start, remaining):
     next_pos = 0
     max_ratio_blue = get_ratio_blue_pixels(image, start, remaining[0])
@@ -43,7 +73,7 @@ def get_simple_best_path(connection_matrix: np.ndarray) -> tuple[list, float]:
         best_score += connection_matrix[best_path[-2]][best_path[-1]]
         matr[:,best_path[-2]] = np.inf
         matr[best_path[-2],:] = np.inf
-        
+
     return best_path, best_score
 
 
@@ -62,7 +92,7 @@ def return_paths(connection_matrix, max_value, current_path, current_score):
                 new_path.append(i)
                 paths.extend(return_paths(connection_matrix, max_value, new_path, new_score))
     return paths
-    
+
 
 def get_best_path(connection_matrix: np.ndarray,abort: float) -> tuple[list, float]:
     simple_score = 0.01
