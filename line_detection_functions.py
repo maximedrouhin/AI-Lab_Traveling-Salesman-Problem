@@ -2,15 +2,28 @@ import cv2
 import numpy as np
 
 def get_ratio_blue_pixels(image,start,end):
-    black_picture = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
-    image_cp = image[:,:,2].copy()
-    image_cp = image_cp.astype(np.int16)
-    image_cp -= 50 # Threshold for blue color
-    image_cp = np.where(image_cp > 0, image_cp, 0)
-    cv2.line(black_picture, start, end, 100, 2)
-    image_cp = np.where(black_picture > 0, image_cp, 0)
-    #print(np.count_nonzero(image_cp)/np.count_nonzero(black_picture))
-    return np.count_nonzero(image_cp)/np.count_nonzero(black_picture)
+    start = np.array(start)
+    end = np.array(end)
+    vector = end - start
+    #get a normalized vector
+    norm_vector = vector / np.linalg.norm(vector)
+    amount = np.ceil(np.linalg.norm(vector)).astype(int)
+    nonzero=0
+    for i in [-1,0,1]:
+        xx = np.linspace(start[0]+i*norm_vector[1], end[0]+i*norm_vector[1], amount).astype(int)
+        yy = np.linspace(start[1]-i*norm_vector[0], end[1]-i*norm_vector[0], amount).astype(int)
+        nonzero += np.count_nonzero(image[yy, xx, 2]>50)
+    return nonzero / (3*amount)
+
+def get_fast_ratio_blue_pixels(image,start,end):
+    start = np.array(start)
+    end = np.array(end)
+    amount = np.ceil(np.linalg.norm(end-start)).astype(int)
+    xx = np.linspace(start[0], end[0], amount).astype(int)
+    yy = np.linspace(start[1], end[1], amount).astype(int)
+    blue = image[yy, xx, 2]
+    return np.count_nonzero(blue > 50) / len(blue)
+
 
 def get_weighted_ratio_blue_pixels(image, start, end):
     # Convert the image from RGB to HSL
@@ -147,68 +160,3 @@ def get_best_path(connection_matrix: np.ndarray,abort: float) -> tuple[list, flo
         #print(simple_score)
     return paths
 
-
-def test_path(connection_matrix, path, K, S):
-    while len(path) < connection_matrix.shape[0]:
-        next_score = np.inf
-        for i in np.argpartition(connection_matrix[path[-1]], K)[:K]:
-            if i not in path:
-                if connection_matrix[path[-1]][i] < next_score:
-                    next_score = connection_matrix[path[-1]][i]
-                    next_pos = i
-        if next_score == np.inf:
-            return False, np.argpartition(connection_matrix[path[-1]], S)[:S]
-        path.append(next_pos)
-
-    return True, path
-
-
-def backtrack_search_old(connection_matrix, path, K, S, D, maxD):
-    if D >= maxD:
-        return False
-    success, result = test_path(connection_matrix, path, K)
-    if success:
-        return result
-    else:
-        print(len(path),"\t",path)
-        for i in range(K):
-            wrong_turn = result[i]
-            print("wrong turn: ", wrong_turn)
-            idx = path.index(wrong_turn)
-            print("idx: ", idx)
-            new_path = path[:idx]
-            print(new_path)
-            for j in np.argpartition(connection_matrix[new_path[-1]], S)[:S]:
-                if j not in new_path:
-                    if j != wrong_turn:
-                        new_path.append(j)
-                        #print("trying: ", new_path)
-                        ret = backtrack_search_old(connection_matrix, new_path, K, S, D+1, maxD)
-                        if ret:
-                            return ret
-    print("no path found")
-    return False
-
-
-
-def backtrack_search(connection_matrix, path, K, S, D, maxD):
-    if D >= maxD:
-        return False
-    success, result = test_path(connection_matrix, path, K, S)
-    if success:
-        return result
-    else:
-        #print(len(path),"\t",path)
-        for i in range(S):
-            wrong_turn = result[i]
-            #print("wrong turn: ", wrong_turn)
-            idx = path.index(wrong_turn)
-            #print("idx: ", idx)
-            new_path = path[:idx+1]
-            new_path.append(wrong_turn)
-            #print(new_path)
-            ret = backtrack_search(connection_matrix, new_path, K, S, D+1, maxD)
-            if ret:
-                return ret
-    #print("no path found")
-    return False
