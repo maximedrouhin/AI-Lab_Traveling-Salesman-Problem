@@ -64,7 +64,7 @@ def get_yellow_circles_my1(image):
 def get_yellow_circles_cv2(image):
     
         # Define lower and upper bounds for yellow color in HSV
-        lower_yellow = np.array([50, 0, 0])
+        lower_yellow = np.array([90, 0, 0])
         upper_yellow = np.array([255, 255, 255])
 
     
@@ -87,3 +87,16 @@ def get_yellow_circles_cv2(image):
             yellow_circles.append([x, y])
     
         return np.array(yellow_circles)
+
+
+def get_green_circle(image):
+    image_cp = image.copy()
+    image_cp = image_cp.astype('int32')
+    green_matrix = image_cp[:,:,1] - image_cp[:,:,0] - image_cp[:,:,2] - 100
+    green_matrix = green_matrix.clip(min=0)
+
+    all_green_positions = np.nonzero(green_matrix)
+
+    average_green_position = np.mean(all_green_positions, axis=1)
+
+    return (int(average_green_position[1]), int(average_green_position[0]))
