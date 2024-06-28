@@ -3,23 +3,26 @@ import numpy as np
 import os
 import matplotlib.image as mpimg
 from functools import partial
-import circle_detection_functions as cdf
-import line_detection_functions as ldf
-import pathfinder_functions as pf
-
 import time
+
+import as_circle_detection_functions as cdf
+import as_line_detection_functions as ldf
+import as_pathfinder_functions as pf
+
+
 
 start_time = time.time()
 print('start time:', time.strftime('%H:%M:%S', time.localtime(start_time)))
 
+#folder structure
 data_folder = 'tsp-cv/'
 
 export_folder = 'results/'
-export_name = 'results3.csv'
+export_name = 'results4.csv'
 
 imagenumbers = range(100, 200)
 
-
+#functions for circle detection, starting position detection, connection matrix and the pathfinding functions
 circle_detection_function = cdf.get_yellow_circles_cv2
 starting_position_function = cdf.get_green_circle
 connection_matrix_function = pf.get_connection_matrix
@@ -32,26 +35,31 @@ functions = {
 
 }
 
-
-
+#open csv file and write header
 with open(os.path.join(export_folder, export_name), mode='w', newline='') as file:
     writer = csv.writer(file)
-    header = ['imagenumber', 'true_lenght']+ [f'{name}_lenght' for name in functions.keys()] + [f'{name}_path' for name in functions.keys()]
+    header = ['imagenumber', 'true_length']+ [f'{name}_length' for name in functions.keys()] + [f'{name}_path' for name in functions.keys()]
     writer.writerow(header)
 
+#for each image, calculate the path and write it to the csv file
 for im_nr in imagenumbers:
     print(im_nr)
+
+    #load image and get true length
     image = mpimg.imread(f'tsp-cv/{im_nr}.jpg')
     with open('tsp-cv/train.csv') as f:
         for i, line in enumerate(f):
             if i == im_nr+1:
-                true_lenght = int(line.split(',')[2])
+                true_length = int(line.split(',')[2])
                 break
+
+    #get positions and connection_matrix
     positions = list(circle_detection_function(image))
     start_pos = starting_position_function(image)
     positions.insert(0, start_pos)
     connection_matrix = connection_matrix_function(image, positions)
 
+    #calculate path and length for each function
     tmp_save = {}
     for name, function in functions.items():
         path = function(connection_matrix)
@@ -59,12 +67,12 @@ for im_nr in imagenumbers:
             tmp_save[name] = [None, None]
             continue
         sorted_positions = [positions[i] for i in path]
-        lenght = 0
+        length = 0
         for i in range(1, len(sorted_positions)):
-            lenght += np.linalg.norm(np.array(sorted_positions[i]) - np.array(sorted_positions[i-1]))
-        tmp_save[name] = [lenght, sorted_positions]
+            length += np.linalg.norm(np.array(sorted_positions[i]) - np.array(sorted_positions[i-1]))
+        tmp_save[name] = [length, sorted_positions]
 
-    next_row = [im_nr, true_lenght]
+    next_row = [im_nr, true_length]
     for name in functions.keys():
         next_row.append(tmp_save[name][0])
     for name in functions.keys():

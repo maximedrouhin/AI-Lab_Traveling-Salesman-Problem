@@ -2,14 +2,17 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
-import circle_detection_functions
-import line_detection_functions
+import as_circle_detection_functions as cdf
+import as_line_detection_functions as ldf
+import as_pathfinder_functions as pf
 from functools import partial
 import colorsys
 
 # Initialize the detection functions
-circle_detecter_function = partial(circle_detection_functions.get_yellow_circles_cv2)
-line_detecter_function = partial(line_detection_functions.get_next_pos)
+circle_detection_function = cdf.get_yellow_circles_cv2
+starting_position_function = cdf.get_green_circle
+connection_matrix_function = pf.get_connection_matrix
+pathfinding_functions = pf.get_simple_best_path
 
 # Sidebar
 st.sidebar.title("Image Selection")
@@ -31,26 +34,16 @@ with open('tsp-cv/train.csv') as f:
             true_length = int(line.split(',')[2])
             break
 
-# Detect the circles
-detected_positions = list(circle_detecter_function(image))
+# Get the detected positions and connection matrix
+positions = list(circle_detection_function(image))
+start_pos = starting_position_function(image)
+positions.insert(0, start_pos)
+connection_matrix = connection_matrix_function(image, positions)
 
-# Detect the green circle
-image_cp = image.copy().astype('int32')
-green_matrix = image_cp[:, :, 1] - image_cp[:, :, 0] - image_cp[:, :, 2] - 100
-green_matrix = green_matrix.clip(min=0)
+#calculate path and length for each function
+path = pathfinding_functions(connection_matrix)
 
-all_green_positions = np.nonzero(green_matrix)
-average_green_position = np.mean(all_green_positions, axis=1)
-start_pos = (int(average_green_position[1]), int(average_green_position[0]))
-
-# Detect the lines
-remaining_positions = detected_positions.copy()
-current_pos = start_pos
-sorted_positions = [current_pos]
-while remaining_positions:
-    next_pos = line_detecter_function(image, current_pos, remaining_positions)
-    current_pos = remaining_positions.pop(next_pos)
-    sorted_positions.append(current_pos)
+sorted_positions = [positions[i] for i in path]
 
 # Helper function to generate a hue gradient
 def get_hue_gradient(start_hue, end_hue, steps):

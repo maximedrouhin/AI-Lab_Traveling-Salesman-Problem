@@ -1,6 +1,6 @@
 import copy
 import numpy as np
-import line_detection_functions as ldf
+import as_line_detection_functions as ldf
 
 def get_connection_matrix(image, positions,score_function=lambda x: 1 - x, line_detection_function = ldf.get_ratio_blue_pixels) -> np.ndarray:
     connection_matrix = np.full((len(positions), len(positions)), np.inf, dtype=np.float64)
