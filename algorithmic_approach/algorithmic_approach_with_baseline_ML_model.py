@@ -6,9 +6,9 @@ import matplotlib.image as mpimg
 from functools import partial
 import time
 
-import as_circle_detection_functions as cdf
-import as_line_detection_functions as ldf
-import as_pathfinder_functions as pf
+import algorithmic_approach.functions_circle_detection as cdf
+import algorithmic_approach.functions_line_detection as ld
+import algorithmic_approach.functions_pathfinding as pf
 
 import keras
 from keras_preprocessing import image

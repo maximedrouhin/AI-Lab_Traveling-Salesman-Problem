@@ -1,8 +1,8 @@
 import copy
 import numpy as np
-import as_line_detection_functions as ldf
+import functions_line_detection as ld
 
-def get_connection_matrix(image, positions,score_function=lambda x: 1 - x, line_detection_function = ldf.get_ratio_blue_pixels) -> np.ndarray:
+def get_connection_matrix(image, positions,score_function=lambda x: 1 - x, line_detection_function = ld.get_ratio_blue_pixels) -> np.ndarray:
     connection_matrix = np.full((len(positions), len(positions)), np.inf, dtype=np.float64)
     for i in range(len(positions)-1):
         for j in range(i+1,len(positions)):
@@ -85,7 +85,7 @@ def get_valid_path_backcheck(connection_matrix: np.ndarray, max_val: float, zero
                 if one > 2:
                     return True
         return False
-    
+
     def restore_connections(valid_connections, restore_pos):
         for node,connection in valid_connections.items():
             if restore_pos in original_connections[node]:
@@ -109,7 +109,7 @@ def get_valid_path_backcheck(connection_matrix: np.ndarray, max_val: float, zero
             restore_connections(valid_connections, path[-1])
             return None
 
-        
+
         while len(reamining_options) > 0:
                 next_pos = reamining_options.pop(0)
                 path.append(next_pos)
@@ -120,7 +120,7 @@ def get_valid_path_backcheck(connection_matrix: np.ndarray, max_val: float, zero
                     path.pop()
 
         restore_connections(valid_connections, path[-1])
-        
+
         return None
 
 
@@ -139,7 +139,7 @@ def get_valid_path_backcheck(connection_matrix: np.ndarray, max_val: float, zero
     for i in range(connection_matrix.shape[0]):
         argsorted = np.argsort(connection_matrix[i][valid_connections[i]])
         valid_connections[i] = list(valid_connections[i][0][argsorted])
-    
+
     #check if the first has at least one connection
     if len(valid_connections[0]) == 0:
         #raise Exception(f"Point 0 has no valid connections")
@@ -155,7 +155,7 @@ def get_valid_path_backcheck(connection_matrix: np.ndarray, max_val: float, zero
                 #raise Exception(f"Point {i} has only one valid connection, but {one_connection} also has only one valid connection")
                 return None
             one_connection = i
-    
+
     #valid_connections = create_new_valid_connections(valid_connections, 0)
     #original_connections = valid_connections.copy()
     original_connections = copy.deepcopy(valid_connections)
@@ -190,7 +190,7 @@ def get_valid_path_backcheck_maxtime(connection_matrix: np.ndarray, max_val: flo
                 if one > 2:
                     return True
         return False
-    
+
     def restore_connections(valid_connections, restore_pos):
         for node,connection in valid_connections.items():
             if restore_pos in original_connections[node]:
@@ -214,7 +214,7 @@ def get_valid_path_backcheck_maxtime(connection_matrix: np.ndarray, max_val: flo
             restore_connections(valid_connections, path[-1])
             return None
 
-        
+
         while len(reamining_options) > 0:
                 if time.time() > end_time:
                     return None
@@ -227,7 +227,7 @@ def get_valid_path_backcheck_maxtime(connection_matrix: np.ndarray, max_val: flo
                     path.pop()
 
         restore_connections(valid_connections, path[-1])
-        
+
         return None
 
 
@@ -246,7 +246,7 @@ def get_valid_path_backcheck_maxtime(connection_matrix: np.ndarray, max_val: flo
     for i in range(connection_matrix.shape[0]):
         argsorted = np.argsort(connection_matrix[i][valid_connections[i]])
         valid_connections[i] = list(valid_connections[i][0][argsorted])
-    
+
     #check if the first has at least one connection
     if len(valid_connections[0]) == 0:
         #raise Exception(f"Point 0 has no valid connections")
@@ -262,7 +262,7 @@ def get_valid_path_backcheck_maxtime(connection_matrix: np.ndarray, max_val: flo
                 #raise Exception(f"Point {i} has only one valid connection, but {one_connection} also has only one valid connection")
                 return None
             one_connection = i
-    
+
     #valid_connections = create_new_valid_connections(valid_connections, 0)
     #original_connections = valid_connections.copy()
     original_connections = copy.deepcopy(valid_connections)
