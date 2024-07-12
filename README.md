@@ -6,6 +6,10 @@ Run `pip install -r requirements.txt` to install the required packages.
 
 ## Main files
 
+### Setup
+
+- `setup.py` lets you download and extract the data from Kaggle for this project.
+
 ### Algorithmic approach
 
 - `algorithmic_approach.py`: main Python file for the algorithmic solution.
