@@ -1,1 +1,10 @@
-fast_tsp
+numpy
+pandas
+matplotlib
+keras
+keras-preprocessing
+scikit-learn
+tensorflow
+opencv-python
+python-tsp
+fast-tsp
