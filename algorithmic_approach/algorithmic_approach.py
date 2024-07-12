@@ -5,9 +5,9 @@ import matplotlib.image as mpimg
 from functools import partial
 import time
 
-import algorithmic_approach.functions_circle_detection as cdf
-import algorithmic_approach.functions_line_detection as ld
-import algorithmic_approach.functions_pathfinding as pf
+import functions_circle_detection as cdf
+import functions_line_detection as ld
+import functions_pathfinding as pf
 
 
 
@@ -81,7 +81,7 @@ for im_nr in imagenumbers:
     with open(os.path.join(export_folder, export_name), mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(next_row)
-        
+
 
 print('end time:', time.strftime('%H:%M:%S', time.localtime(time.time())))
 print('total time:', time.time() - start_time)

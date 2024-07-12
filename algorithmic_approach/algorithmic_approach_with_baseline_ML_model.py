@@ -6,9 +6,9 @@ import matplotlib.image as mpimg
 from functools import partial
 import time
 
-import algorithmic_approach.functions_circle_detection as cdf
-import algorithmic_approach.functions_line_detection as ld
-import algorithmic_approach.functions_pathfinding as pf
+import functions_circle_detection as cdf
+import functions_line_detection as ld
+import functions_pathfinding as pf
 
 import keras
 from keras_preprocessing import image
@@ -57,7 +57,7 @@ with open(os.path.join(export_folder, export_name), mode='w', newline='') as fil
     header = header + [f'{name}_path' for name in pathfinder_functions.keys()]
     header = header + [f'{name}_time' for name in pathfinder_functions.keys()]
     header = header + ['AI_prediction', 'AI_time']
-    
+
     writer.writerow(header)
 
 #for each image, calculate the path and write it to the csv file
@@ -121,7 +121,7 @@ for i,row in train_data.iterrows():
     with open(os.path.join(export_folder, export_name), mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(next_row)
-        
+
 
 print('end time:', time.strftime('%H:%M:%S', time.localtime(time.time())))
 print('total time:', time.time() - start_time)
